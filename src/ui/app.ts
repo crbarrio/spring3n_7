@@ -18,31 +18,26 @@ const renderTasks = async () => {
     return
   }
 
-  if (!tasks || tasks.length === 0) {
-		taskList.innerHTML = 'No tasks found'
-	} else {
-		let tasksHtml = '<table class="table table-borderless"><thead><tr><th>Task</th><th>Status</th><th>Actions</th></tr></thead><tbody>'
+  let tasksHtml = '<table class="table table-borderless"><caption class="visually-hidden">Lista de tareas del usuario</caption><thead><tr><th scope="col">Task</th><th scope="col">Status</th><th scope="col">Actions</th></tr></thead><tbody>'
 
-		tasks.forEach((task) => {
-			let actionsHtml = ''
+  tasks.forEach((task) => {
+    let actionsHtml = ''
+    const taskName = task.tarea ?? 'Untitled task'
 
-			if (task.completada) {
-				actionsHtml = `<td class="col-3"><button class="${actionButtonClass} btn-outline-danger delete-btn" data-id="${task.id_tarea}"><i class="${actionIconClass}">delete</i></button></td>`
-			} else {
-				actionsHtml = `<td class="col-3">
-		  <button class="${actionButtonClass} btn-outline-success complete-btn" data-id="${task.id_tarea}"><i class="${actionIconClass}">check</i></button>
-		  <button class="${actionButtonClass} btn-outline-danger delete-btn" data-id="${task.id_tarea}"><i class="${actionIconClass}">delete</i></button>
-		</td>`
-			}
+    if (task.completada) {
+      actionsHtml = `<td class="col-3"><button type="button" class="${actionButtonClass} btn-outline-danger delete-btn" data-id="${task.id_tarea}" aria-label="Delete task ${taskName}"><i class="${actionIconClass}" aria-hidden="true">delete</i></button></td>`
+    } else {
+      actionsHtml = `<td class="col-3">
+      <button type="button" class="${actionButtonClass} btn-outline-success complete-btn" data-id="${task.id_tarea}" aria-label="Mark task ${taskName} as completed"><i class="${actionIconClass}" aria-hidden="true">check</i></button>
+      <button type="button" class="${actionButtonClass} btn-outline-danger delete-btn" data-id="${task.id_tarea}" aria-label="Delete task ${taskName}"><i class="${actionIconClass}" aria-hidden="true">delete</i></button>
+    </td>`
+    }
 
-			tasksHtml += `<tr><td>${task.tarea}</td><td>${task.completada ? 'Completada' : 'Pendiente'}</td>${actionsHtml}</tr>`
-		})
+    tasksHtml += `<tr><th scope="row">${taskName}</th><td>${task.completada ? 'Completada' : 'Pendiente'}</td>${actionsHtml}</tr>`
+  })
 
-		tasksHtml += '</tbody></table>'
-        taskList.innerHTML = tasksHtml
-	}
-
-	
+  tasksHtml += '</tbody></table>'
+  taskList.innerHTML = tasksHtml
 }
 
 export const renderApp = async () => {
@@ -50,37 +45,50 @@ export const renderApp = async () => {
 
   appRoot.innerHTML = `
   <nav class="navbar navbar-expand-lg bg-body-tertiary mb-4">
-	  <h1 class="ms-3 h4">Supabase Test</h1>
-	  <span class="ms-auto me-3">${sessionState.userEmail ?? ''}</span>
+    <h1 class="ms-3 h4" id="app-title">Supabase Test</h1>
+    <p class="ms-auto me-3 mb-0" aria-label="Current signed in user">${sessionState.userEmail ?? ''}</p>
 	  <button class="btn btn-outline-danger me-3" id="logout-button">Logout</button>
 	</nav>
 
-	<div class="container">
+  <main class="container" aria-labelledby="app-title">
 	  <div class="row">
-		<div class="col-md-8">
-		  <h2 class="h5 mb-5">Task List</h2>
-		  <ul id="task-list"></ul>
-		</div>
-		<div class="col-md-4">
-		  <h2 class="h5 mb-5">Add New Task</h2>
-		  <form id="task-form">
+    <section class="col-md-8" aria-labelledby="task-list-title">
+      <h2 class="h5 mb-5" id="task-list-title">Task List</h2>
+      <div id="task-list" aria-live="polite" aria-busy="false"></div>
+    </section>
+    <section class="col-md-4" aria-labelledby="task-form-title">
+      <h2 class="h5 mb-5" id="task-form-title">Add New Task</h2>
+      <form id="task-form" aria-describedby="error-message">
 			<div class="mb-3">
 			  <label for="task-input" class="form-label fw-bold">Task</label>
-			  <input type="text" class="form-control" id="task-input" placeholder="Enter a new task">
+        <input type="text" class="form-control" id="task-input" name="task" required placeholder="Enter a new task">
 			</div>
-			<button type="button" class="btn btn-outline-primary" id="add-task-button">Add Task</button>
+      <button type="submit" class="btn btn-outline-primary" id="add-task-button">Add Task</button>
 		  </form>
-		  <div id="error-message" class="mt-3 text-danger"></div>
-		</div>
+      <p id="error-message" class="mt-3 text-danger mb-0" role="alert" aria-live="assertive" aria-atomic="true"></p>
+    </section>
 	  </div>
-	</div>`
+  </main>`
 
-  const addTaskButton = document.getElementById('add-task-button')
+  const taskForm = document.getElementById('task-form') as HTMLFormElement | null
   const logoutButton = document.getElementById('logout-button')
   const taskList = document.getElementById('task-list')
 
-  addTaskButton?.addEventListener('click', async () => {
+  taskForm?.addEventListener('submit', async (event) => {
+    event.preventDefault()
+
     const taskInput = document.getElementById('task-input') as HTMLInputElement
+    const errorMessage = document.getElementById('error-message')
+
+    errorMessage?.replaceChildren()
+
+    if (!taskInput.value.trim()) {
+      if (errorMessage) {
+        errorMessage.textContent = 'Please enter a task.'
+      }
+      return
+    }
+
     await createTask(taskInput.value)
     taskInput.value = ''
     await renderTasks()
