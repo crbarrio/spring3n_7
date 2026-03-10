@@ -68,21 +68,21 @@ const renderLogin = () => {
 	appRoot.innerHTML = ''
 	loginRoot.innerHTML = `
 		<div class="d-flex justify-content-center align-items-center vh-100">
-		<div class="card p-4 shadow" style="width: 300px;">
-			<h2 class="h5 mb-4 text-center">Login</h2>
-			<form id="login-form">
-			<div class="mb-3">
-				<label for="email-input" class="form-label fw-bold">Email</label>
-				<input type="email" class="form-control" id="email-input" placeholder="Enter your email">
+			<div class="card p-4 shadow" style="width: 300px;">
+				<h2 class="h5 mb-4 text-center">Login</h2>
+				<form id="login-form">
+				<div class="mb-3">
+					<label for="email-input" class="form-label fw-bold">Email</label>
+					<input type="email" class="form-control" id="email-input" placeholder="Enter your email">
+				</div>
+				<div class="mb-3">
+					<label for="password-input" class="form-label fw-bold">Password</label>
+					<input type="password" class="form-control" id="password-input" placeholder="Enter your password">
+				</div>
+				<button type="button" class="btn btn-primary w-100" id="login-button">Login</button>
+				</form>
+				<div id="login-error-message" class="mt-3 text-danger"></div>
 			</div>
-			<div class="mb-3">
-				<label for="password-input" class="form-label fw-bold">Password</label>
-				<input type="password" class="form-control" id="password-input" placeholder="Enter your password">
-			</div>
-			<button type="button" class="btn btn-primary w-100" id="login-button">Login</button>
-			</form>
-			<div id="login-error-message" class="mt-3 text-danger"></div>
-		</div>
 		</div>
 	`
 
@@ -238,9 +238,6 @@ const init = async () => {
 }
 
 init()
-
-// 7820Cc-25111982
-//sb_publishable_PM5dFwTA6xkMR9ADBInMgQ_w_oBJfP_
 
 // crbarrio@hotmail.com
 //testsupabase
